@@ -1,0 +1,10 @@
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\obj\Debug\PixelArtCreator.csprojResolveAssemblyReference.cache
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\obj\Debug\PixelArtCreator.PixelArt.resources
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\obj\Debug\PixelArtCreator.Properties.Resources.resources
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\obj\Debug\PixelArtCreator.csproj.GenerateResource.Cache
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\bin\Debug\PixelArtCreator.exe.config
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\bin\Debug\PixelArtCreator.exe
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\bin\Debug\PixelArtCreator.pdb
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\bin\Debug\Magick.NET-Q16-AnyCPU.dll
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\obj\Debug\PixelArtCreator.exe
+c:\users\karse\documents\visual studio 2015\Projects\PixelArtCreator\PixelArtCreator\obj\Debug\PixelArtCreator.pdb
