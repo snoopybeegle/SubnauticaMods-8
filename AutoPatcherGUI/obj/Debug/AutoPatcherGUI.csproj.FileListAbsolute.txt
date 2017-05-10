@@ -1,0 +1,28 @@
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\AutoPatcherGUI.exe
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\AutoPatcherGUI.pdb
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Assembly-CSharp.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Mono.Cecil.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Mono.Cecil.Mdb.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Mono.Cecil.Pdb.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Mono.Cecil.Rocks.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\UnityEngine.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Assembly-CSharp-firstpass.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\UnityEngine.UI.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Poly2Tri.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Newtonsoft.Json.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\iTween.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\LitJson.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\protobuf-net.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\UM4SN.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\LumenWorks.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\LibNoise.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\Mono.Security.dll
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\bin\Debug\UnityEngine.xml
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\obj\Debug\AutoPatcherGUI.csprojResolveAssemblyReference.cache
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\obj\Debug\AutoPatcherGUI.apgui.resources
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\obj\Debug\AutoPatcherGUI.Properties.Resources.resources
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\obj\Debug\AutoPatcherGUI.csproj.GenerateResource.Cache
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\obj\Debug\AutoPatcherGUI.exe
+C:\Users\karse\Documents\Visual Studio 2015\Projects\AutoPatcherGUI\AutoPatcherGUI\obj\Debug\AutoPatcherGUI.pdb
+C:\Users\karse\Desktop\AutoPatcherGUI\obj\Debug\AutoPatcherGUI.exe
+C:\Users\karse\Desktop\AutoPatcherGUI\obj\Debug\AutoPatcherGUI.pdb
