@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using UM4SN;
 using UnityEngine;
+using System.Reflection;
 
 namespace BaseLight
 {
@@ -84,21 +86,41 @@ namespace BaseLight
             StarshipMonitor.AddComponent<TechTag>().type = TechType.id_6289;
             ConstructableBounds sc_constructableBounds = new ConstructableBounds();
             sc_constructableBounds.bounds = new OrientedBounds(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 1f), new Vector3(1.5f, 0.5f, 1.5f));
+            Texture2D lightoff = Texture2DFromData(Properties.Resources.testlight_png);
             GameObject I_UNITYID_63300 = Instantiate(UNITYID_63300);
             GameObject I_UNITYID_32295 = Instantiate(UNITYID_32295);
             GameObject I_UNITYID_35434 = Instantiate(UNITYID_35434);
             I_UNITYID_63300.transform.parent = StarshipMonitor.transform;
             I_UNITYID_32295.transform.parent = StarshipMonitor.transform;
             I_UNITYID_35434.transform.parent = StarshipMonitor.transform;
+            I_UNITYID_63300.GetComponent<Renderer>().materials[1].SetTexture("_MainTex", lightoff);
+            I_UNITYID_63300.GetComponent<Renderer>().materials[1].SetTexture("_Illum", lightoff);
             StarshipMonitor.AddComponent<BaseLightScript>();
+            StarshipMonitor.AddComponent<DontDestroyBaseLight>();
             sc_constructable.model = I_UNITYID_63300;
             TechTypeItems.registerCustomTechType(6289, classID, "Light switch", "Turn the lights off and on!", EquipmentType.None, StarshipMonitor, "nesraksmods/baseswitch");
+        }
+
+        public Texture2D Texture2DFromData(byte[] data)
+        {
+            Texture2D texture = new Texture2D(0, 0);
+            texture.LoadImage(data);
+            return texture;
         }
     }
 
     public class BaseLightScript : HandTarget, IHandTarget
     {
         bool isOn = true;
+
+        Texture2D lightoff;
+        Texture2D lighton;
+
+        public void Start()
+        {
+            lightoff = Texture2DFromData(Properties.Resources.testlight_png);
+            lighton = Texture2DFromData(Properties.Resources.testlight2_png);
+        }
 
         public void OnHandHover(GUIHand hand)
         {
@@ -111,11 +133,40 @@ namespace BaseLight
             if (isOn)
             {
                 GetComponentInParent<SubRoot>().ForceLightingState(false);
+                foreach (Component comp in GetComponentsInChildren<Component>())
+                {
+                    if (comp.name == "Starship_wall_monitor_01_03(Clone)")
+                    {
+                        comp.GetComponent<Renderer>().materials[1].SetTexture("_MainTex", lightoff);
+                    }
+                }
             } else
             {
                 GetComponentInParent<SubRoot>().ForceLightingState(true);
+                foreach (Component comp in GetComponentsInChildren<Component>())
+                {
+                    if (comp.name == "Starship_wall_monitor_01_03(Clone)")
+                    {
+                        comp.GetComponent<Renderer>().materials[1].SetTexture("_MainTex", lighton);
+                    }
+                }
             }
             isOn = !isOn;
+        }
+
+        public Texture2D Texture2DFromData(byte[] data)
+        {
+            Texture2D texture = new Texture2D(0, 0);
+            texture.LoadImage(data);
+            return texture;
+        }
+    }
+
+    public class DontDestroyBaseLight : MonoBehaviour
+    {
+        public void Awake()
+        {
+            DontDestroyOnLoad(transform.gameObject);
         }
     }
 }
