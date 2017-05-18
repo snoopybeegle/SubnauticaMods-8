@@ -15,6 +15,7 @@ namespace Patcher3
         //todo: cleanup arguments to actual variables
         public static void PatchFromFile(string file, bool verbose)
         {
+            bool superVerbose = false;
             StreamReader sr = new StreamReader(Path.GetFullPath(file));
             string versionInfo = sr.ReadLine();
             if (versionInfo != "pat3")
@@ -48,7 +49,7 @@ namespace Patcher3
                 if (currentLine == "") { continue; }
                 switch (lineData[0])
                 {
-                    case "a": //load main assembly
+                    case "loadassembly": //load main assembly
                         if (assembly != null)
                         {
                             assembly.Write(assembly.Name.Name + ".pat.dll");
@@ -56,22 +57,22 @@ namespace Patcher3
                         assembly = AssemblyDefinition.ReadAssembly(lineData[1]);
                         if (verbose) { Console.WriteLine("loading main assembly " + lineData[1]); }
                         break;
-                    case "ar": //load assembly reference
+                    case "loadassemblyreference": //load assembly reference
                         assemblyReferenceList[lineData[1]] = AssemblyDefinition.ReadAssembly(lineData[2]);
                         if (verbose) { Console.WriteLine("loading assembly reference " + lineData[2]); }
                         break;
-                    case "aw": //write assembly
+                    case "writeassembly": //write assembly
                         if (verbose) { Console.WriteLine("writing to " + assembly.Name.Name + ".pat.dll"); }
                         assembly.Write(assembly.Name.Name + ".pat.dll");
                         if (verbose) { Console.WriteLine("done writing to " + assembly.Name.Name + ".pat.dll"); }
                         assembly = null;
                         break;
-                    case "awc": //write assembly without close
+                    case "writeassemblynoclose": //write assembly without close
                         if (verbose) { Console.WriteLine("writing to " + assembly.Name.Name + ".pat.dll"); }
                         assembly.Write(assembly.Name.Name + ".pat.dll");
                         if (verbose) { Console.WriteLine("done writing to " + assembly.Name.Name + ".pat.dll"); }
                         break;
-                    case "t": //set type
+                    case "settype": //set type
                         if (lineData[2] == "!c")
                         {
                             typeList[lineData[1]] = assembly.MainModule.Types.Where(t => t.Name.Equals(lineData[3])).Select(t => t).First();
@@ -82,15 +83,15 @@ namespace Patcher3
                             if (verbose) { Console.WriteLine("loading type " + lineData[3] + " from " + lineData[2]); }
                         }
                         break;
-                    case "m": //set method
+                    case "setmethod": //set method
                         methodList[lineData[1]] = typeList[lineData[2]].Methods.Where(t => t.Name.Equals(lineData[3])).Select(t => t).First();
                         if (verbose) { Console.WriteLine("loading method " + lineData[3] + " from " + lineData[2]); }
                         break;
-                    case "mr": //set method reference
+                    case "setmethodreference": //set method reference
                         methodReferenceList[lineData[1]] = methodList[lineData[2]].Module.Import(typeList[lineData[3]].Methods.Where(t => t.Name.Equals(lineData[4])).Select(t => t).First());
                         if (verbose) { Console.WriteLine("loading method reference " + lineData[1] + " from " + lineData[3]); }
                         break;
-                    case "l": //loop (PLEASE FIX FOR ALL COMMANDS)
+                    case "loop": //loop (PLEASE FIX FOR ALL COMMANDS)
                         string varName = lineData[3];
                         string nextCommand = sr.ReadLine();
                         List<string> lineData_nc;
@@ -98,13 +99,12 @@ namespace Patcher3
                         .Cast<Match>()
                         .Select(m => m.Value)
                         .ToList();
-                        Console.WriteLine(string.Join(",", lineData_nc.ToArray()));
                         for (int i = int.Parse(lineData[1]); i < int.Parse(lineData[2]); i++)
                         {
                             variableList[varName] = i;
                             switch (lineData_nc[0])
                             {
-                                case "afv": //add field with variable
+                                case "addfieldwithvariable": //add field with variable
                                     List<string> fieldAttributes = lineData_nc[2].Split(new [] { "|" }, StringSplitOptions.None).ToList();
                                     List<string> variableData = lineData_nc[4].Split(new[] { "|" }, StringSplitOptions.None).ToList();
                                     string[] variableDataArgs = variableData.Skip(1).ToArray();
@@ -118,7 +118,7 @@ namespace Patcher3
                                     FieldAttributes fa = 0; //acAfOmdMrilnIpPrsS
                                     foreach (string fieldAttrib in fieldAttributes)
                                     {
-                                        fa = fa | (FieldAttributes)Enum.Parse(typeof(FieldAttributes), fieldAttrib);
+                                        fa |= (FieldAttributes)Enum.Parse(typeof(FieldAttributes), fieldAttrib);
                                     }
                                     //todo: replace with method
 
@@ -133,7 +133,7 @@ namespace Patcher3
                                     }
                                     if (!(typeList[lineData_nc[1]].Fields.Skip(1).Where(n => n.Constant.Equals(constant)).Any()))
                                     {
-                                        if (verbose) { Console.WriteLine("adding " + string.Format(variableData[0], variableDataArgs) + " to " + lineData_nc[1] + " = " + constant); }
+                                        if (verbose && superVerbose) { Console.WriteLine("adding " + string.Format(variableData[0], variableDataArgs) + " to " + lineData_nc[1] + " = " + constant); }
                                         typeList[lineData_nc[1]].Fields.Add(fd);
                                         fd.Constant = constant;
                                     }
@@ -142,7 +142,19 @@ namespace Patcher3
                         }
                         if (verbose) { Console.WriteLine("finished loop (" + lineData[1] + "-" + lineData[2] + ")"); }
                         break;
-                    case "ifn": //set instruction from number or !f/!l
+                    case "setmethodproperty":
+                        List<string> methodAttributes = lineData[2].Split(new[] { "|" }, StringSplitOptions.None).ToList();
+                        List<string> methodData = lineData[3].Split(new[] { "|" }, StringSplitOptions.None).ToList();
+                        //shouldn't be too bad right ( ͡o ͜ʖ ͡o)
+                        for (int i = 0; i < methodAttributes.Count; i++)
+                        {
+                            methodList[lineData[1]].GetType().GetProperty(methodAttributes[i]).SetValue(methodList[lineData[1]], bool.Parse(methodData[i]), null);
+                        }
+                        break;
+                    case "setfieldproperty":
+
+                        break;
+                    case "setinstruction": //set instruction from number or !f/!l
                         if (lineData[3] == "!f")
                         {
                             instructionList[lineData[1]] = methodList[lineData[2]].Body.Instructions.First();
@@ -154,7 +166,7 @@ namespace Patcher3
                             instructionList[lineData[1]] = methodList[lineData[2]].Body.Instructions[int.Parse(lineData[3])];
                         }
                         break;
-                    case "ciilr": //create instruction from il and run
+                    case "runinstruction": //create instruction from il and run
                         ILProcessor processor_ciilr = methodList[lineData[1]].Body.GetILProcessor();
                         Instruction instruction_ciilr = null;
                         switch (lineData[5])
