@@ -1,0 +1,8 @@
+c:\users\karse\documents\visual studio 2015\Projects\Patcher3\Patcher3\bin\Debug\Patcher3.exe
+c:\users\karse\documents\visual studio 2015\Projects\Patcher3\Patcher3\bin\Debug\Patcher3.pdb
+c:\users\karse\documents\visual studio 2015\Projects\Patcher3\Patcher3\obj\Debug\Patcher3.csprojResolveAssemblyReference.cache
+c:\users\karse\documents\visual studio 2015\Projects\Patcher3\Patcher3\obj\Debug\Patcher3.exe
+c:\users\karse\documents\visual studio 2015\Projects\Patcher3\Patcher3\obj\Debug\Patcher3.pdb
+c:\users\karse\documents\visual studio 2015\Projects\Patcher3\Patcher3\bin\Debug\Patcher3.exe.config
+c:\users\karse\documents\visual studio 2015\Projects\Patcher3\Patcher3\bin\Debug\Mono.Cecil.dll
+c:\users\karse\documents\visual studio 2015\Projects\Patcher3\Patcher3\bin\Debug\Mono.Cecil.Mdb.dll
