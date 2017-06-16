@@ -1,0 +1,125 @@
+pat3
+um4sn installer|nesrak1
+
+# ####################################
+# # SUBNAUTICA.PT3 - UM4SN installer #
+# ### BY NESRAK1 UNDER MIT LICENSE ###
+# ####################################
+
+loadassembly Assembly-CSharp.dll
+loadassemblyreference UnityEngine UnityEngine.dll
+loadassemblyreference UM4SN UM4SN.dll
+
+# Patching region: Game Start
+settype StartScreen !c StartScreen
+settype PluginLoader UM4SN PluginLoader
+setmethod StartScreen_Start StartScreen Start
+setmethodreference StartModLoader_r StartScreen_Start PluginLoader StartModLoader
+runinstruction StartScreen_Start b 0 Call method StartModLoader_r
+
+# Patching region: World Load
+settype MainMenuMusic !c MainMenuMusic
+setmethod MainMenuMusic_Stop MainMenuMusic Stop
+setmethodreference ModLoaderFinishedLoading_r MainMenuMusic_Stop PluginLoader ModLoaderFinishedLoading
+runinstruction MainMenuMusic_Stop b -1 Call method ModLoaderFinishedLoading_r
+
+# Patching region: World Load Start
+settype MainMenuLoadButton !c MainMenuLoadButton
+setmethod MainMenuLoadButton_Load MainMenuLoadButton Load
+setmethodreference StartModLoaderLoading_r MainMenuLoadButton_Load PluginLoader StartModLoaderLoading
+runinstruction MainMenuLoadButton_Load b 0 Call method StartModLoaderLoading_r
+
+# Patching region: Vehicle/Base Creation
+settype CellManager !c CellManager
+settype UYE_Component UnityEngine Component
+setmethod CellManager_RegisterGlobalEntity CellManager RegisterGlobalEntity
+setmethodreference get_transform CellManager_RegisterGlobalEntity UYE_Component get_transform
+setmethodreference get_gameObject CellManager_RegisterGlobalEntity UYE_Component get_gameObject
+setmethodreference LargeWorldEntityUM_r CellManager_RegisterGlobalEntity PluginLoader LargeWorldEntityUMLoad
+runinstruction CellManager_RegisterGlobalEntity b 0 Ldarg_1 none
+runinstruction CellManager_RegisterGlobalEntity a 0 Call method LargeWorldEntityUM_r
+
+# Patching region: TechType Creation
+settype TechType !c TechType
+loop 0 10000 i
+addfieldwithvariable TechType Public|HasDefault|Static|Literal $i id_{0}|$i
+
+# Patching region: Public Resource Map
+settype Constructable !c Constructable
+setmethod Constructable_InitResourceMap Constructable InitResourceMap
+setmethodproperty Constructable_InitResourceMap IsPublic true
+
+# Patching region: Item Spawn
+settype TechTree !c TechTree
+setmethod TechTree_InstantiateFromPrefab TechTree InstantiateFromPrefab
+setmethodreference GameObjectSpawned_r TechTree_InstantiateFromPrefab PluginLoader GameObjectSpawned
+runinstruction TechTree_InstantiateFromPrefab a 3 Ldarg_0 none
+runinstruction TechTree_InstantiateFromPrefab a 4 Call method GameObjectSpawned_r
+
+# Patching region: TechTree Load
+setmethod TechTree_InitializeTechTree TechTree InitializeTechTree
+setmethodreference TechTreeLoaded_r TechTree_InitializeTechTree PluginLoader TechTreeLoaded
+runinstruction TechTree_InitializeTechTree b -1 Call method TechTreeLoaded_r
+
+# Patching region: Public GetInternal
+setmethod TechTree_GetInternal TechTree GetInternal
+setmethodproperty TechTree_GetInternal IsPublic true
+
+# Patching region: Public New
+setmethod TechTree_New TechTree New
+setmethodproperty TechTree_New IsPrivate false
+setmethodproperty TechTree_New IsPublic true
+
+# Patching region: Public root
+setfield TechTree_root TechTree root
+setfieldproperty TechTree_root IsPrivate false
+setfieldproperty TechTree_root IsPublic true
+
+# Patching region: Public InternalAction
+setnestedtype TechTree_InternalAction TechTree InternalAction
+setnestedtypeproperty TechTree_InternalAction IsNestedPrivate false
+setnestedtypeproperty TechTree_InternalAction IsNestedPublic true
+
+# Patching region: Public entClassTechTable
+settype CraftData !c CraftData
+setfield CraftData_entClassTechTable CraftData entClassTechTable
+setfieldproperty CraftData_entClassTechTable IsPrivate false
+setfieldproperty CraftData_entClassTechTable IsPublic true
+
+# Patching region: Public equipmentTypes
+setfield CraftData_equipmentTypes CraftData equipmentTypes
+setfieldproperty CraftData_equipmentTypes IsPrivate false
+setfieldproperty CraftData_equipmentTypes IsPublic true
+
+# Patching region: Public techMapping
+setfield CraftData_techMapping CraftData techMapping
+setfieldproperty CraftData_techMapping IsPrivate false
+setfieldproperty CraftData_techMapping IsPublic true
+setfieldproperty CraftData_techMapping IsInitOnly false
+
+# Patching region: Public groups
+setfield CraftData_groups CraftData groups
+setfieldproperty CraftData_groups IsPrivate false
+setfieldproperty CraftData_groups IsPublic true
+
+# Patching region: Public buildables
+setfield CraftData_buildables CraftData buildables
+setfieldproperty CraftData_buildables IsPrivate false
+setfieldproperty CraftData_buildables IsPublic true
+
+# Patching region: CraftData Creation
+setmethod CraftData_PreparePrefabIDCache CraftData PreparePrefabIDCache
+setmethodreference AfterCraftCreated_r CraftData_PreparePrefabIDCache PluginLoader AfterCraftCreated
+runinstruction CraftData_PreparePrefabIDCache b -1 Call method AfterCraftCreated_r
+
+# Patching region: Public strings
+settype Language !c Language
+setfield Language_strings Language strings
+setfieldproperty Language_strings IsPrivate false
+setfieldproperty Language_strings IsPublic true
+
+# Patching region: Public IExosuitArm
+settype IExosuitArm !c IExosuitArm
+settypeproperty IExosuitArm IsPublic true
+
+writeassembly
