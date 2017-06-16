@@ -21,7 +21,7 @@ runinstruction StartScreen_Start b 0 Call method StartModLoader_r
 settype MainMenuMusic !c MainMenuMusic
 setmethod MainMenuMusic_Stop MainMenuMusic Stop
 setmethodreference ModLoaderFinishedLoading_r MainMenuMusic_Stop PluginLoader ModLoaderFinishedLoading
-runinstruction MainMenuMusic_Stop b -1 Call method ModLoaderFinishedLoading_r
+runinstruction MainMenuMusic_Stop b 0 Call method ModLoaderFinishedLoading_r
 
 # Patching region: World Load Start
 settype MainMenuLoadButton !c MainMenuLoadButton
