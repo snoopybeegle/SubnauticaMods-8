@@ -123,3 +123,32 @@ settype IExosuitArm !c IExosuitArm
 settypeproperty IExosuitArm IsPublic true
 
 writeassembly
+
+loadassembly Assembly-CSharp-firstpass.dll
+loadassemblyreference UnityEngine UnityEngine.dll
+loadassemblyreference UM4SN UM4SN.dll
+
+# Patching region: Item References
+settype PrefabDatabase !c PrefabDatabase
+settype TechTypeItems UM4SN TechTypeItems
+settype UYE_Object UnityEngine Object
+setmethod PrefabDatabase_GetPrefabForFilename PrefabDatabase GetPrefabForFilename
+changeinstruction PrefabDatabase_GetPrefabForFilename 5 Brtrue_S
+runinstruction PrefabDatabase_GetPrefabForFilename a 5 Ldarg_0 none
+setmethodreference cTGO_r PrefabDatabase_GetPrefabForFilename TechTypeItems cTGO
+runinstruction PrefabDatabase_GetPrefabForFilename a 6 Call method cTGO_r
+runinstruction PrefabDatabase_GetPrefabForFilename a 7 Stloc_0 none
+runinstruction PrefabDatabase_GetPrefabForFilename a 8 Ldloc_0 none
+setmethodreference op_Implicit_r PrefabDatabase_GetPrefabForFilename UYE_Object op_Implicit
+runinstruction PrefabDatabase_GetPrefabForFilename a 9 Call method op_Implicit_r
+setinstruction Ins_10_r PrefabDatabase_GetPrefabForFilename -2
+runinstruction PrefabDatabase_GetPrefabForFilename a 10 Brtrue_S instruction
+setmethod PrefabDatabase_LoadPrefabDatabase PrefabDatabase LoadPrefabDatabase
+setmethodreference DatabaseLoaded_r PrefabDatabase_LoadPrefabDatabase PluginLoader DatabaseLoaded
+runinstruction PrefabDatabase_LoadPrefabDatabase a 31 Call method DatabaseLoaded_r
+
+writeassembly
+
+cmd "if not exist `$cdir\DllBackups\` mkdir `$cdir\DllBackups\`"
+cmd "copy `$cdir\Assembly-CSharp.dll` `$cdir\DllBackups\Assembly-CSharp.dll`"
+cmd "copy `$cdir\Assembly-CSharp-firstpass.dll` `$cdir\DllBackups\Assembly-CSharp-firstpass.dll`"
