@@ -13,10 +13,24 @@ namespace Patcher3
         {
             if (args.Length == 0)
             {
+                Console.Title = "pat3";
                 Console.WriteLine("pat3");
                 if (File.Exists("patch.pt3"))
                 {
                     Console.WriteLine("patch.pt3 found, using default file.");
+                    Console.WriteLine("");
+                    Patcher.PatMetadata metadata = Patcher.GetMetadata(AppDomain.CurrentDomain.BaseDirectory + "\\patch.pt3");
+                    string filename = metadata.name;
+                    string author = metadata.author;
+                    int i = 3;
+                    while (i != -1)
+                    {
+                        Console.CursorLeft = 0;
+                        Console.WriteLine($"starting in {i} \"{filename}\" by {author}");
+                        System.Threading.Thread.Sleep(1000);
+                        i--;
+                        Console.CursorTop--;
+                    }
                     Console.WriteLine("");
                     Patcher.PatchFromFile("patch.pt3", true);
                 }
@@ -25,13 +39,16 @@ namespace Patcher3
                     Console.WriteLine("patch.pt3 was not found, please specify file.");
                     Console.WriteLine("");
                     int choice = 1;
-                    string pathLocation = "patch.pt3";
+                    string pathLocation = "";
                     while (choice == 1)
                     {
                         choice = -1;
                         pathLocation = ConsoleUI.ShowTextfield(35);
                         ConsoleUI.ClearTextfield(35);
-                        Console.WriteLine("are you sure you want to patch this file?");
+                        Patcher.PatMetadata metadata = Patcher.GetMetadata(AppDomain.CurrentDomain.BaseDirectory + "\\" + pathLocation);
+                        string filename = metadata.name;
+                        string author = metadata.author;
+                        Console.WriteLine($"are you sure you want to patch \"{filename}\" by {author}");
                         choice = ConsoleUI.ShowSelection(new string[] { "yes", "choose file" });
                     }
                     Patcher.PatchFromFile(pathLocation, true);

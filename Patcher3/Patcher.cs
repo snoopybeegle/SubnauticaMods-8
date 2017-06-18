@@ -12,10 +12,26 @@ namespace Patcher3
 {
     public class Patcher
     {
-        //todo: cleanup arguments to actual variables
-        public static void PatchFromFile(string file, bool verbose)
+        public struct LoopDistance
         {
-            bool superVerbose = false;
+            public bool isLooping;
+            public int loopStart;
+            public int loopEnd;
+            public int currentIteration;
+            public string iteratorString;
+
+            public LoopDistance(bool isLooping, int loopStart = 0, int loopEnd = 0, int currentIteration = 0, string iteratorString = "i")
+            {
+                this.isLooping = isLooping;
+                this.loopStart = loopStart;
+                this.loopEnd = loopEnd;
+                this.currentIteration = currentIteration;
+                this.iteratorString = iteratorString;
+            }
+        }
+
+        public async static void PatchFromFile(string file, bool verbose)
+        {
             StreamReader sr = new StreamReader(Path.GetFullPath(file));
             string versionInfo = sr.ReadLine();
             if (versionInfo != "pat3")
@@ -35,184 +51,152 @@ namespace Patcher3
             Dictionary<string, Instruction> instructionList = new Dictionary<string, Instruction>();
             Dictionary<string, ILProcessor> processorList = new Dictionary<string, ILProcessor>();
             Dictionary<string, int> variableList = new Dictionary<string, int>();
-            AssemblyDefinition assembly = null;
 
             string currentLine = "";
             List<string> lineData;
             Console.WriteLine("");
-            while ((currentLine = sr.ReadLine()) != null)
+            PatchActions patchActions = new PatchActions();
+            patchActions.verbose = verbose;
+            LoopDistance isLooping = new LoopDistance(false);
+            currentLine = sr.ReadLine();
+            while (currentLine != null)
             {
-                lineData = Regex.Matches(currentLine, @"[\""].+?[\""]|[^ ]+")
-                .Cast<Match>()
-                .Select(m => m.Value)
-                .ToList();
-                if (currentLine == "") { continue; }
-                switch (lineData[0])
+                lineData = Regex.Matches(currentLine, @"[\""].+?[\""]|[^ ]+").Cast<Match>().Select(m => m.Value).ToList();
+                if (currentLine == "") { currentLine = sr.ReadLine(); continue; }
+                isLooping = ParseLine(patchActions, true, isLooping, lineData);
+                currentLine = sr.ReadLine();
+                if (isLooping.isLooping)
                 {
-                    case "loadassembly": //load main assembly
-                        if (assembly != null)
-                        {
-                            assembly.Write(assembly.Name.Name + ".pat.dll");
-                        }
-                        assembly = AssemblyDefinition.ReadAssembly(lineData[1]);
-                        if (verbose) { Console.WriteLine("loading main assembly " + lineData[1]); }
-                        break;
-                    case "loadassemblyreference": //load assembly reference
-                        assemblyReferenceList[lineData[1]] = AssemblyDefinition.ReadAssembly(lineData[2]);
-                        if (verbose) { Console.WriteLine("loading assembly reference " + lineData[2]); }
-                        break;
-                    case "writeassembly": //write assembly
-                        if (verbose) { Console.WriteLine("writing to " + assembly.Name.Name + ".pat.dll"); }
-                        assembly.Write(assembly.Name.Name + ".pat.dll");
-                        if (verbose) { Console.WriteLine("done writing to " + assembly.Name.Name + ".pat.dll"); }
-                        assembly = null;
-                        break;
-                    case "writeassemblynoclose": //write assembly without close
-                        if (verbose) { Console.WriteLine("writing to " + assembly.Name.Name + ".pat.dll"); }
-                        assembly.Write(assembly.Name.Name + ".pat.dll");
-                        if (verbose) { Console.WriteLine("done writing to " + assembly.Name.Name + ".pat.dll"); }
-                        break;
-                    case "settype": //set type
-                        if (lineData[2] == "!c")
-                        {
-                            typeList[lineData[1]] = assembly.MainModule.Types.Where(t => t.Name.Equals(lineData[3])).Select(t => t).First();
-                            if (verbose) { Console.WriteLine("loading type " + lineData[3] + " from " + assembly.Name.Name); }
-                        } else
-                        {
-                            typeList[lineData[1]] = assemblyReferenceList[lineData[2]].MainModule.Types.Where(t => t.Name.Equals(lineData[3])).Select(t => t).First();
-                            if (verbose) { Console.WriteLine("loading type " + lineData[3] + " from " + lineData[2]); }
-                        }
-                        break;
-                    case "setmethod": //set method
-                        methodList[lineData[1]] = typeList[lineData[2]].Methods.Where(t => t.Name.Equals(lineData[3])).Select(t => t).First();
-                        if (verbose) { Console.WriteLine("loading method " + lineData[3] + " from " + lineData[2]); }
-                        break;
-                    case "setmethodreference": //set method reference
-                        methodReferenceList[lineData[1]] = methodList[lineData[2]].Module.Import(typeList[lineData[3]].Methods.Where(t => t.Name.Equals(lineData[4])).Select(t => t).First());
-                        if (verbose) { Console.WriteLine("loading method reference " + lineData[1] + " from " + lineData[3]); }
-                        break;
-                    case "loop": //loop (PLEASE FIX FOR ALL COMMANDS)
-                        string varName = lineData[3];
-                        string nextCommand = sr.ReadLine();
-                        List<string> lineData_nc;
-                        lineData_nc = Regex.Matches(nextCommand, @"[\""].+?[\""]|[^ ]+")
-                        .Cast<Match>()
-                        .Select(m => m.Value)
-                        .ToList();
-                        for (int i = int.Parse(lineData[1]); i < int.Parse(lineData[2]); i++)
-                        {
-                            variableList[varName] = i;
-                            switch (lineData_nc[0])
-                            {
-                                case "addfieldwithvariable": //add field with variable
-                                    List<string> fieldAttributes = lineData_nc[2].Split(new [] { "|" }, StringSplitOptions.None).ToList();
-                                    List<string> variableData = lineData_nc[4].Split(new[] { "|" }, StringSplitOptions.None).ToList();
-                                    string[] variableDataArgs = variableData.Skip(1).ToArray();
-                                    for (int j = 0; j < variableDataArgs.Length; j++)
-                                    {
-                                        if (variableDataArgs[j].StartsWith("$"))
-                                        {
-                                            variableDataArgs[j] = variableList[lineData_nc[3].Substring(1)].ToString();
-                                        }
-                                    }
-                                    FieldAttributes fa = 0; //acAfOmdMrilnIpPrsS
-                                    foreach (string fieldAttrib in fieldAttributes)
-                                    {
-                                        fa |= (FieldAttributes)Enum.Parse(typeof(FieldAttributes), fieldAttrib);
-                                    }
-                                    //todo: replace with method
-
-                                    FieldDefinition fd = new FieldDefinition(string.Format(variableData[0], variableDataArgs), fa, typeList[lineData_nc[1]]);
-                                    int constant = 0;
-                                    if (lineData_nc[3].StartsWith("$"))
-                                    {
-                                        constant = variableList[lineData_nc[3].Substring(1)];
-                                    } else
-                                    {
-                                        constant = int.Parse(lineData_nc[3]);
-                                    }
-                                    if (!(typeList[lineData_nc[1]].Fields.Skip(1).Where(n => n.Constant.Equals(constant)).Any()))
-                                    {
-                                        if (verbose && superVerbose) { Console.WriteLine("adding " + string.Format(variableData[0], variableDataArgs) + " to " + lineData_nc[1] + " = " + constant); }
-                                        typeList[lineData_nc[1]].Fields.Add(fd);
-                                        fd.Constant = constant;
-                                    }
-                                    break;
-                            }
-                        }
-                        if (verbose) { Console.WriteLine("finished loop (" + lineData[1] + "-" + lineData[2] + ")"); }
-                        break;
-                    case "setmethodproperty":
-                        List<string> methodAttributes = lineData[2].Split(new[] { "|" }, StringSplitOptions.None).ToList();
-                        List<string> methodData = lineData[3].Split(new[] { "|" }, StringSplitOptions.None).ToList();
-                        //shouldn't be too bad right ( ͡o ͜ʖ ͡o)
-                        for (int i = 0; i < methodAttributes.Count; i++)
-                        {
-                            methodList[lineData[1]].GetType().GetProperty(methodAttributes[i]).SetValue(methodList[lineData[1]], bool.Parse(methodData[i]), null);
-                        }
-                        break;
-                    case "setfieldproperty":
-
-                        break;
-                    case "setinstruction": //set instruction from number or !f/!l
-                        if (lineData[3] == "!f")
-                        {
-                            instructionList[lineData[1]] = methodList[lineData[2]].Body.Instructions.First();
-                        } else if (lineData[3] == "!l")
-                        {
-                            instructionList[lineData[1]] = methodList[lineData[2]].Body.Instructions.Last();
-                        } else
-                        {
-                            instructionList[lineData[1]] = methodList[lineData[2]].Body.Instructions[int.Parse(lineData[3])];
-                        }
-                        break;
-                    case "runinstruction": //create instruction from il and run
-                        ILProcessor processor_ciilr = methodList[lineData[1]].Body.GetILProcessor();
-                        Instruction instruction_ciilr = null;
-                        switch (lineData[5])
-                        {
-                            case "none":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null));
-                                break;
-                            case "byte":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null), byte.Parse(lineData[6]));
-                                break;
-                            case "double":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null), double.Parse(lineData[6]));
-                                break;
-                            case "float":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null), float.Parse(lineData[6]));
-                                break;
-                            case "instruction":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null), instructionList[lineData[6]]);
-                                break;
-                            case "int":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null), int.Parse(lineData[6]));
-                                break;
-                            case "long":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null), long.Parse(lineData[6]));
-                                break;
-                            case "method":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null), methodReferenceList[lineData[6]]);
-                                break;
-                            case "string":
-                                instruction_ciilr = processor_ciilr.Create((OpCode)typeof(OpCodes).GetField(lineData[4]).GetValue(null), lineData[6]);
-                                break;
-                        }
-                        if (verbose) { Console.WriteLine("creating instruction " + lineData[4]); }
-                        if (lineData[2] == "b")
-                        {
-                            processor_ciilr.InsertBefore(processor_ciilr.Body.Instructions[int.Parse(lineData[3])], instruction_ciilr);
-                        } else if (lineData[2] == "a")
-                        {
-                            processor_ciilr.InsertAfter(processor_ciilr.Body.Instructions[int.Parse(lineData[3])], instruction_ciilr);
-                        } else if (lineData[2] == "ap")
-                        {
-                            processor_ciilr.Append(instruction_ciilr);
-                        }
-                        break;
+                    lineData = Regex.Matches(currentLine, @"[\""].+?[\""]|[^ ]+").Cast<Match>().Select(m => m.Value).ToList();
+                    while (isLooping.isLooping)
+                    {
+                        isLooping = ParseLine(patchActions, true, isLooping, lineData);
+                    }
+                    currentLine = sr.ReadLine();
                 }
             }
+        }
+
+        public static LoopDistance ParseLine(PatchActions patchActions, bool verbose, LoopDistance isLooping, List<string> lineData)
+        {
+            if (isLooping.isLooping)
+            {
+                patchActions.SetVariable(isLooping.iteratorString, isLooping.currentIteration);
+            }
+            switch (lineData[0])
+            {
+                case "loadassembly": //load main assembly
+                    patchActions.LoadAssembly(lineData[1]);
+                    break;
+                case "loadassemblyreference": //load assembly reference
+                    patchActions.LoadAssemblyReference(lineData[1], lineData[2]);
+                    break;
+                case "writeassembly": //write assembly
+                    if (lineData.Count == 1)
+                    {
+                        patchActions.WriteAssembly(true);
+                    }
+                    else
+                    {
+                        patchActions.WriteAssembly(lineData[1], true);
+                    }
+                    break;
+                case "writeassemblynoclose": //write assembly without close
+                    if (lineData.Count == 1)
+                    {
+                        patchActions.WriteAssembly(false);
+                    }
+                    else
+                    {
+                        patchActions.WriteAssembly(lineData[1], false);
+                    }
+                    break;
+                case "settype": //set type
+                    patchActions.SetType(lineData[1], lineData[2], lineData[3]);
+                    break;
+                case "setfield": //set field
+                    patchActions.SetField(lineData[1], lineData[2], lineData[3]);
+                    break;
+                case "setmethod": //set method
+                    patchActions.SetMethod(lineData[1], lineData[2], lineData[3]);
+                    break;
+                case "setmethodreference": //set method reference
+                    patchActions.SetMethodReference(lineData[1], lineData[2], lineData[3], lineData[4]);
+                    break;
+                case "loop": //loop (only add field with variable is supported atm)
+                    string varName = lineData[3];
+                    if (isLooping.isLooping == true)
+                    {
+                        if (verbose) { Console.WriteLine("nested loops are not supported."); }
+                    } else
+                    {
+                        return new LoopDistance(true, int.Parse(lineData[1]), int.Parse(lineData[2]), int.Parse(lineData[1]), lineData[3]);
+                    }
+                    //if (verbose) { Console.WriteLine("finished loop (" + lineData[1] + "-" + lineData[2] + ")"); }
+                    break;
+                case "addfieldwithvariable": //add field with variable
+                    patchActions.Loop_AddFieldWithVariable(lineData[1], lineData[2], lineData[3], lineData[4]);
+                    break;
+                case "settypeproperty":
+                    patchActions.SetTypeProperty(lineData[1], lineData[2], lineData[3]);
+                    break;
+                case "setmethodproperty":
+                    patchActions.SetMethodProperty(lineData[1], lineData[2], lineData[3]);
+                    break;
+                case "setfieldproperty":
+                    patchActions.SetFieldProperty(lineData[1], lineData[2], lineData[3]);
+                    break;
+                case "setinstruction": //set instruction from number or !f/!l
+                    patchActions.SetInstruction(lineData[1], lineData[2], lineData[3]);
+                    break;
+                case "runinstruction": //create instruction from il and run
+                    patchActions.SetRunInstruction(lineData[1], lineData[2], lineData[3], lineData[4], lineData[5], lineData.Count < 7 ? "" : lineData[6]);
+                    break;
+                case "cmd":
+                    System.Diagnostics.Process process = new System.Diagnostics.Process();
+                    System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = "/C " + lineData[1].Replace("`","\"").Replace("$cdir", AppDomain.CurrentDomain.BaseDirectory);
+                    process.StartInfo = startInfo;
+                    process.Start();
+                    break;
+                case "#":
+                    if (verbose)
+                    {
+                        Console.WriteLine(string.Join(" ", lineData.Skip(1)));
+                    }
+                    break;
+            }
+            if (isLooping.isLooping == false || isLooping.currentIteration >= isLooping.loopEnd)
+            {
+                return new LoopDistance(false);
+            } else
+            {
+                isLooping.currentIteration++;
+                return isLooping;
+            }
+        }
+
+        public struct PatMetadata
+        {
+            public string name;
+            public string author;
+        }
+
+        public static PatMetadata GetMetadata(string filename)
+        {
+            string filedata = File.ReadLines(filename).Skip(1).Take(1).First();
+            PatMetadata metadata = new PatMetadata();
+            if (filedata == "nometadata" || filedata == "nometadata ")
+            {
+                metadata.name = Path.GetFileName(filename);
+                metadata.author = "unknown";
+            } else {
+                metadata.name = filedata.Split('|')[0];
+                metadata.author = filedata.Split('|')[1];
+            }
+            return metadata;
         }
     }
 }
